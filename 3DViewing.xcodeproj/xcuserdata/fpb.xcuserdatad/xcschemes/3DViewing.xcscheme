@@ -57,6 +57,12 @@
             ReferencedContainer = "container:3DViewing.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <CommandLineArguments>
+         <CommandLineArgument
+            argument = "/Users/fpb/Downloads/Female1_bvh/Female1_C11_RunTurnLeft90.bvh"
+            isEnabled = "YES">
+         </CommandLineArgument>
+      </CommandLineArguments>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>

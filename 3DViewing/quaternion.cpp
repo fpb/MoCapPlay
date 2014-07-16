@@ -8,6 +8,11 @@
 
 #include "quaternion.h"
 
+// Default Quaternion
+Quaternion::Quaternion():w(0), x(1), y(0), z(0)
+{
+}
+
 // Quaternion from quaternion
 Quaternion::Quaternion(const Quaternion &other): w(other.w), x(other.x), y(other.y), z(other.z)
 {
@@ -195,6 +200,53 @@ std::ostream& operator << (std::ostream& os, const Quaternion &q) {
     return os << q.w << " " << q.x << " " << q.y << " " << q.z;
 }
 
+
+Quaternion Quaternion::rotationFromTo(const glm::vec3 &from, const glm::vec3 &to)
+{
+/*  
+    glm::vec3 f = from; f/=glm::length(f);
+    glm::vec3 t = to;   t/=glm::length(t);
+    
+    glm::vec3 axis = glm::cross(f, t);
+    if(glm::length(axis)<1e-6) {
+        axis = glm::vec3(f.x, f.y, f.z);
+    }
+    
+    float angle = 180 * acos(glm::dot(f,t)) / M_PI;
+    
+    return Quaternion(axis, -angle);
+*/
+    
+    glm::vec3 v0 = from;
+    glm::vec3 v1 = to;
+    
+    v0 = v0 / glm::length(v0);
+    v1 = v1 / glm::length(v1);
+
+    float d = glm::dot(v0, v1);
+    if(d >= 1.0) {
+        Quaternion n(1.0, 0.0, 0.0, 0.0);
+        return n;
+    }
+    if( d < 1e-6 - 1.0) {
+        glm::vec3 axis = glm::cross(glm::vec3(1,0,0), v0);
+        if(glm::length(axis) < 1e-6) {
+            axis = glm::cross(glm::vec3(0,1,0), v0);
+            axis = axis / glm::length(axis);
+        }
+        Quaternion q(axis, 180);
+        return q;
+    }
+    float s = ::sqrt((1+d)*2);
+    float invs = 1 / s;
+    
+    glm::vec3 c = glm::cross(v0,v1);
+    Quaternion r(s*0.5, c.x*invs, c.y*invs, c.z*invs);
+    r.normalize();
+    
+    return r;
+}
+
 // Tests
 
 void quaternion_test_vector_rotation()
@@ -217,3 +269,4 @@ void quaternion_test_vector_rotation()
     rrr = y_axis_rot.rotate(glm::vec4(1,0,0,1));
     std::cout << "Rotated x41 (rotate)" << rrr.x << " " << rrr.y << " " << rrr.z << " " << rrr.w << std::endl;
 }
+

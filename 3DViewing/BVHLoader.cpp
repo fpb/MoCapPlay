@@ -9,6 +9,7 @@
 
 #include "BVHLoader.h"
 
+
 BVHLoader::BVHLoader(const std::string &bvhFile)
 {
     bHierarchyLoaded = false;

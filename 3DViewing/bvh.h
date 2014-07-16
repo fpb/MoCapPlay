@@ -27,12 +27,14 @@ public:
     std::vector<BVH> children;
     std::vector<BVHChannel> channels;
     BVH *parent;
+    Quaternion preRot;
 
 public:
     BVH();
     virtual ~BVH();
     
     virtual void dumpTree(const std::string &prefix="") const;
+    virtual void dumpPointTo() const;
     virtual void process(const std::vector<std::string> &lines, int &offset, mode currMode);
     BVH init(const std::string &bvhFile);
     int parseMotionFrame(std::vector<std::string> &lines, int &offset);
@@ -41,6 +43,8 @@ public:
     int motionDataSize() const;
     Quaternion getLocalTransform() const;
     void dumpState(const Quaternion &q, std::ostream &output) const;
+    void setPreRot(const glm::vec3 &from);
+    glm::vec3 pointTo() const;
 };
 
 #endif /* defined(___DViewing__bvh__) */

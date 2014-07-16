@@ -15,6 +15,7 @@
 
 class Quaternion {
 public:
+    Quaternion();
     Quaternion(const Quaternion &other);
     Quaternion(const glm::vec3 &v);
     Quaternion(const glm::vec3 &v, float angle);
@@ -37,6 +38,7 @@ public:
     glm::mat4 matrix4() const;
 
     void getHeadingAttitudeBank(float &heading, float &attitude, float &bank) const;
+    static Quaternion rotationFromTo(const glm::vec3 &from, const glm::vec3 &to);
     
 public:
     float w, x, y, z;

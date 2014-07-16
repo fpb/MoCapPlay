@@ -82,7 +82,9 @@ void load_bvh(std::string filename)
     bvhloader->loadHierarchy();
     //if(bvhloader->hasMoreMotionData())
     //    bvhloader->parseMotionData();
+    bvhloader->root.setPreRot(glm::vec3(0,1,0));
     bvhloader->root.dumpTree();
+    bvhloader->root.dumpPointTo();
 }
 
 Phigs3DView camera;
@@ -221,6 +223,35 @@ void idleFunc()
         if(running & bvhloader->hasMoreMotionData())
             bvhloader->parseMotionData();
     }
+}
+
+int main2(int argc, char *argv[])
+{
+    glm::vec3 from(0,1,0.00000001);
+    from /= glm::length(from);
+    
+    glm::vec3 to(0,1,0);
+    to /= glm::length(to);
+    
+    glm::vec3 axis = glm::cross(from, to);
+    std::cout << "Axis " << axis.x << " " << axis.y << " " << axis.z << std::endl;
+
+    if( glm::length(axis) <= 1e-6 ) {
+        std::cout << "Dot: " << glm::dot(from, to) << std::endl;
+        axis = glm::vec3(from.x, from.z, from.y);
+    }
+    
+    
+    float angle = 180 * acos(glm::dot(from, to)) / M_PI;
+    std::cout << "angle = " << angle << std::endl;
+    
+    Quaternion qrot(axis, angle);
+    
+    glm::vec3 test = qrot.rotate(from);
+    
+    std::cout << test.x << " " << test.y << " " << test.z << std::endl;
+    
+    return 0;
 }
 
 int main(int argc, char *argv[])

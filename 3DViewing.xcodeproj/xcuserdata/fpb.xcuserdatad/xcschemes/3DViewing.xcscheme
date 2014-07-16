@@ -59,7 +59,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "/Users/fpb/Downloads/Female1_bvh/Female1_C11_RunTurnLeft90.bvh"
+            argument = "/Users/fpb/Desktop/MOCAP/jumpkick.bvh"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

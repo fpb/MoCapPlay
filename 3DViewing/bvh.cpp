@@ -21,6 +21,17 @@ BVH::~BVH()
 {
 }
 
+void BVH::dumpPointTo() const
+{
+    std::cout << name << ": ";
+    glm::vec3 p = pointTo();
+    
+    std::cout << p.x << "," << p.y << "," << p.z << std::endl;
+    
+    for(int i=0; i<children.size(); i++)
+        children[i].dumpPointTo();
+}
+
 void BVH::dumpTree(const std::string &prefix) const
 {
     std::string newprefix = prefix + "\t";
@@ -265,7 +276,6 @@ Quaternion BVH::getLocalTransform() const
     Quaternion qx(glm::vec3(1,0,0),rx), qy(glm::vec3(0,1,0),ry), qz(glm::vec3(0,0,1),rz);
 
     Quaternion q(glm::vec3(1,0,0), 0);
-
     for(int i=0; i<channels.size(); i++)
     {
                 if(channels[i] == BVHChannel::Xrotation) q = q * qx;
@@ -278,18 +288,60 @@ Quaternion BVH::getLocalTransform() const
     return q;
 }
 
+void BVH::setPreRot(const glm::vec3 &from)
+{
+    glm::vec3 to = pointTo();
+    
+    glm::vec3 f = glm::vec3(0,1,0);
+    
+    preRot = Quaternion::rotationFromTo(to, f);
+    
+    for(int i=0; i<children.size(); i++) {
+        children[i].setPreRot(f);
+    }
+}
+
+glm::vec3 BVH::pointTo() const
+{
+    glm::vec3 total;
+    
+    for(int i=0; i<children.size(); i++) {
+        total = total + children[i].offset;
+    }
+    
+    total = total / glm::length(total);
+    
+    return total;
+}
+
 void BVH::dumpState(const Quaternion &q, std::ostream &output) const
 {
     // qz * qx * qy
     Quaternion qql = getLocalTransform();
-    Quaternion qqg = q * qql;
+
     output << "\"" << std::setw(16) << std::left << name << "\"";
     output << std::setprecision(3) << std::fixed;
-    output << "\t(w,x,y,z)=" << "(" << std::setw(6) << std::right << qqg.w << "," << std::setw(6) << qqg.x << "," << std::setw(6) << qqg.y << "," << std::setw(6) << qqg.z << ")";
-    float ex, ey, ez;
-    qql.getHeadingAttitudeBank(ex, ey, ez);
-    output << "\t rx=" << ex << " ry=" << ey << " rz=" << ez;
+    output << "\t(w,x,y,z)=" << "(" << std::setw(6) << std::right << qql.w << "," << std::setw(6) << qql.x << "," << std::setw(6) << qql.y << "," << std::setw(6) << qql.z << ")";
+    
+//    float ex, ey, ez;
+//    qql.getHeadingAttitudeBank(ex, ey, ez);
+//    output << "\t rx=" << ex << " ry=" << ey << " rz=" << ez;
+//    output << "\t pre: " << preRot;
+    
+    std::cout << "PreRot=" << preRot;
+    glm::vec3 u(qql.x, qql.y, qql.z);
+    float len = glm::length(u);
+    u/= len;
+    glm::vec3 v = preRot.rotate(u);
+    v *= len;
+    
+//    std::cout << "U=(" << u.x << "," << u.y << "," << u.z << ")" << std::endl;
+//    std::cout << "V=(" << v.x << "," << v.y << "," << v.z << ")" << std::endl;
+    Quaternion tt = Quaternion(qql.w, v.x, v.y, v.z);
+    
+    output << "\tBlender(w,x,y,z)=" << "(" << std::setw(6) << std::right << tt.w << "," << std::setw(6) << tt.x << "," << std::setw(6) << tt.y << "," << std::setw(6) << tt.z << ")";
     output << std::endl;
+
     //output << "Local (w,x,y,z)=" << "(" << qql.w << "," << qql.x << "," << qql.y << "," << qql.z << ")" << std::endl;
     //output << "(rx,ry,rz)=" << "(" << rx << "," << ry << "," << rz << ")" << std::endl;
 

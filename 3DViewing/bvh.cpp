@@ -292,6 +292,9 @@ void BVH::setPreRot(const glm::vec3 &from)
 {
     glm::vec3 to = pointTo();
     
+    if( glm::length(to) < 1e-6 )
+        to = glm::vec3(0,1,0);
+    
     glm::vec3 f = glm::vec3(0,1,0);
     
     preRot = Quaternion::rotationFromTo(to, f);
@@ -309,7 +312,8 @@ glm::vec3 BVH::pointTo() const
         total = total + children[i].offset;
     }
     
-    total = total / glm::length(total);
+    float len = glm::length(total);
+    total = len > 1e-6 ? total / len : total;
     
     return total;
 }
@@ -321,7 +325,7 @@ void BVH::dumpState(const Quaternion &q, std::ostream &output) const
 
     output << "\"" << std::setw(16) << std::left << name << "\"";
     output << std::setprecision(3) << std::fixed;
-    output << "\t(w,x,y,z)=" << "(" << std::setw(6) << std::right << qql.w << "," << std::setw(6) << qql.x << "," << std::setw(6) << qql.y << "," << std::setw(6) << qql.z << ")";
+//    output << "\t(w,x,y,z)=" << "(" << std::setw(6) << std::right << qql.w << "," << std::setw(6) << qql.x << "," << std::setw(6) << qql.y << "," << std::setw(6) << qql.z << ")";
     
 //    float ex, ey, ez;
 //    qql.getHeadingAttitudeBank(ex, ey, ez);
@@ -331,10 +335,16 @@ void BVH::dumpState(const Quaternion &q, std::ostream &output) const
     std::cout << "PreRot=" << preRot;
     glm::vec3 u(qql.x, qql.y, qql.z);
     float len = glm::length(u);
-    u/= len;
-    glm::vec3 v = preRot.rotate(u);
-    v *= len;
+    glm::vec3 v;
     
+    if( len < 1e-6) {
+        v = glm::vec3(0,0,0);
+    }
+    else {
+        u/= len;
+        v = preRot.rotate(u);
+        v *= len;
+    }
 //    std::cout << "U=(" << u.x << "," << u.y << "," << u.z << ")" << std::endl;
 //    std::cout << "V=(" << v.x << "," << v.y << "," << v.z << ")" << std::endl;
     Quaternion tt = Quaternion(qql.w, v.x, v.y, v.z);
